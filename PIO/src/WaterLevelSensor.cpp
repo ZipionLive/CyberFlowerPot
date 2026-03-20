@@ -15,6 +15,8 @@ uint8_t highData[12] = {0};
 WaterLevelSensor::WaterLevelSensor(const uint8_t i2cLowAddr, const uint8_t i2cHighAddr) {
     _i2cLowAddr = i2cLowAddr;
     _i2cHighAddr = i2cHighAddr;
+
+    Wire.begin();
 }
 
 float WaterLevelSensor::readWaterLevel() {
@@ -48,7 +50,7 @@ float WaterLevelSensor::readWaterLevel() {
     }
 
     // 20 sections for 10cm => 1 section = 0.5cm
-    return raw * 0.5f;
+    return trigSection * 0.5f;
 }
 
 bool WaterLevelSensor::i2cDeviceAvailable(uint8_t addr) {
