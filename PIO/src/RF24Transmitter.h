@@ -11,6 +11,7 @@ class RF24Transmitter {
 public:
     explicit RF24Transmitter(uint8_t chipSelectPin, uint8_t chipEnablePin, uint8_t channel);
     void sendText(String text);
+    bool sendPayload(uint8_t* data, uint8_t size);
 private:
     uint8_t _channel;
     RF24 _radio;
