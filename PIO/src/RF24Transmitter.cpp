@@ -23,6 +23,7 @@ void RF24Transmitter::sendText(String text) {
     _radio.setChannel(_channel); // RF channel from 0 to 125
     _radio.setPALevel(RF24_PA_LOW); // Reduces power consumption and minimizes power supply issues
     _radio.setDataRate(RF24_1MBPS);
+    _radio.setAutoAck(false);
     _radio.openWritingPipe(address);
     _radio.stopListening();
 
@@ -58,6 +59,24 @@ void RF24Transmitter::sendText(String text) {
     }
 
     Serial.println("Text sent successfully");
+}
+
+bool RF24Transmitter::sendPayload(uint8_t* data, uint8_t size) {
+    constexpr byte address[6] = "CFP1";
+
+    if (!_radio.begin()) {
+        Serial.println("nRF24L01 not detected !");
+        return false;
+    }
+
+    _radio.setChannel(_channel); // RF channel from 0 to 125
+    _radio.setPALevel(RF24_PA_LOW); // Reduces power consumption and minimizes power supply issues
+    _radio.setDataRate(RF24_1MBPS);
+    _radio.setAutoAck(false);
+    _radio.openWritingPipe(address);
+    _radio.stopListening();
+
+    return _radio.write(data, size);
 }
 
 

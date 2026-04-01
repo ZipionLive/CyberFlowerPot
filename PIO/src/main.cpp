@@ -4,6 +4,7 @@
 #include "SoilMoistureSensor.h"
 #include "TemperatureSensor.h"
 #include "WaterLevelSensor.h"
+#include "SensorPayload.h"
 
 #define SMS_PIN A0
 #define TS_PIN 2
@@ -22,38 +23,25 @@ unsigned long previousMillis = 0;
 const unsigned long interval = 500;
 char buffer[32];
 
-void sendHumidity() {
-    const int humidity = sms.readPercentage();
-    const String s { sprintf(buffer, "[HUM]%d", humidity) };
-    rft.sendText(s);
-    // Serial.write("Humidity : ");
-    // Serial.write(humidity);
-    // Serial.write("%");
-    // Serial.println();
-}
+void sendPayload() {
+    SensorPayload payload{};
 
-void sendTemperature() {
-    const float temperature = ts.readTemperature();
-    const String s { sprintf(buffer, "[TMP]%.2f", temperature) };
-    rft.sendText(s);
-    // Serial.write("Temperature : ");
-    // Serial.print(temperature, 2);
-    // Serial.write("°C");
-    // Serial.println();
-}
+    payload.humidity = sms.readPercentage();
+    payload.temperature = ts.readTemperature();
+    payload.waterLevel = wls.readWaterLevel();
 
-void sendWaterLevel() {
-    const float waterLevel = wls.readWaterLevel();
-    const String s { sprintf(buffer, "[WLV]%.1f", waterLevel) };
-    rft.sendText(s);
-    // if (waterLevel < 0) {
-    //     Serial.println("Water level sensor not found!");
-    // } else {
-    //     Serial.write("Water level : ");
-    //     Serial.print(waterLevel, 1);
-    //     Serial.write("cm");
-    //     Serial.println();
-    // }
+    bool ok = rft.sendPayload((uint8_t*)&payload, sizeof(payload));
+
+    if (!ok) {
+        Serial.println("Failed to send payload");
+    }
+
+    Serial.print("H:");
+    Serial.print(payload.humidity);
+    Serial.print(" T:");
+    Serial.print(payload.temperature, 2);
+    Serial.print(" W:");
+    Serial.println(payload.waterLevel, 1);
 }
 
 void setup() {
@@ -65,9 +53,6 @@ void loop() {
 
     if (currentMillis - previousMillis >= interval) {
         previousMillis += interval;
-
-        sendHumidity();
-        sendTemperature();
-        sendWaterLevel();
+        sendPayload();
     }
 }
